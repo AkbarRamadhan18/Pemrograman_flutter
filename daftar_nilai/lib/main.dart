@@ -8,44 +8,37 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: MyForm(),
+      home: InputPage(),
     );
   }
 }
 
-class MyForm extends StatefulWidget {
+class InputPage extends StatefulWidget {
   @override
-  _MyFormState createState() => _MyFormState();
+  _InputPageState createState() => _InputPageState();
 }
 
-class _MyFormState extends State<MyForm> {
-  TextEditingController nomorBPController = TextEditingController();
+class _InputPageState extends State<InputPage> {
+  TextEditingController nobpController = TextEditingController();
   TextEditingController namaController = TextEditingController();
   TextEditingController mtkController = TextEditingController();
-  TextEditingController bIngController = TextEditingController();
+  TextEditingController bingController = TextEditingController();
   TextEditingController javaController = TextEditingController();
-
-  void resetForm() {
-    nomorBPController.clear();
-    namaController.clear();
-    mtkController.clear();
-    bIngController.clear();
-    javaController.clear();
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Input Data"),
+        title: Text('Input Data'),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             TextField(
-              controller: nomorBPController,
-              decoration: InputDecoration(labelText: 'Nomor BP'),
+              controller: nobpController,
+              decoration: InputDecoration(labelText: 'No BP'),
             ),
             TextField(
               controller: namaController,
@@ -53,32 +46,97 @@ class _MyFormState extends State<MyForm> {
             ),
             TextField(
               controller: mtkController,
-              decoration: InputDecoration(labelText: 'MTK'),
+              decoration: InputDecoration(labelText: 'Matematika'),
             ),
             TextField(
-              controller: bIngController,
-              decoration: InputDecoration(labelText: 'B. Ing'),
+              controller: bingController,
+              decoration: InputDecoration(labelText: 'Bahasa Inggris'),
             ),
             TextField(
               controller: javaController,
               decoration: InputDecoration(labelText: 'Java'),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 16.0),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
                 ElevatedButton(
                   onPressed: () {
-                    // Implement OK button functionality here
+                    double mtk = double.parse(mtkController.text);
+                    double bing = double.parse(bingController.text);
+                    double java = double.parse(javaController.text);
+
+                    double rataRata = (mtk + bing + java) / 3;
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ResultPage(
+                          nobp: nobpController.text,
+                          nama: namaController.text,
+                          mtk: mtk,
+                          bing: bing,
+                          java: java,
+                          rataRata: rataRata,
+                        ),
+                      ),
+                    );
                   },
-                  child: Text("OK"),
+                  child: Text('OK'),
                 ),
+                SizedBox(width: 16.0),
                 ElevatedButton(
-                  onPressed: resetForm,
-                  child: Text("Reset"),
+                  onPressed: () {
+                    nobpController.clear();
+                    namaController.clear();
+                    mtkController.clear();
+                    bingController.clear();
+                    javaController.clear();
+                  },
+                  child: Text('Reset'),
                 ),
               ],
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ResultPage extends StatelessWidget {
+  final String nobp;
+  final String nama;
+  final double mtk;
+  final double bing;
+  final double java;
+  final double rataRata;
+
+  ResultPage({
+    required this.nobp,
+    required this.nama,
+    required this.mtk,
+    required this.bing,
+    required this.java,
+    required this.rataRata,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Hasil'),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text('No BP: $nobp'),
+            Text('Nama: $nama'),
+            Text('Matematika: $mtk'),
+            Text('Bahasa Inggris: $bing'),
+            Text('Java: $java'),
+            Text('Rata-rata Nilai: $rataRata'),
           ],
         ),
       ),
