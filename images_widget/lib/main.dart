@@ -1,7 +1,6 @@
-
 import 'package:flutter/material.dart';
 
-void main(){
+void main() {
   runApp(MyApp());
 }
 
@@ -17,8 +16,8 @@ class MyApp extends StatelessWidget {
           child: Container(
             width: 350,
             height: 500,
-            color: Colors.brown,  
-            child: Image.asset("images/esa.jpg", fit: BoxFit.cover),
+            color: Colors.brown,
+            child: Image.asset("images/profile.jpg", fit: BoxFit.cover),
           ),
         ),
       ),
