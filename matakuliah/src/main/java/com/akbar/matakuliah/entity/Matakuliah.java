@@ -12,31 +12,41 @@ import jakarta.persistence.Table;
 
 /**
  *
- * @author azzammil akbar ramadhan
+ * @author HP 840 G3
  */
 @Entity
 @Table
 public class Matakuliah {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long kode;
+    private Long id;
+    private String kode;
     private String nama;
-    private Long sks;
+    private int sks;
 
     public Matakuliah() {
     }
 
-    public Matakuliah(Long kode, String nama, Long sks) {
+    public Matakuliah(Long id, String kode, String nama, int sks) {
+        this.id = id;
         this.kode = kode;
         this.nama = nama;
         this.sks = sks;
     }
 
-    public Long getKode() {
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getKode() {
         return kode;
     }
 
-    public void setKode(Long kode) {
+    public void setKode(String kode) {
         this.kode = kode;
     }
 
@@ -48,22 +58,17 @@ public class Matakuliah {
         this.nama = nama;
     }
 
-    public Long getSks() {
+    public int getSks() {
         return sks;
     }
 
-    public void setSks(Long sks) {
+    public void setSks(int sks) {
         this.sks = sks;
     }
-    
-    
 
     @Override
     public String toString() {
-        return "Matakuliah{" + "kode=" + kode + ", nama=" + nama + ", sks=" + sks + '}';
-    }
-
-    
-    
+        return "Matakuliah{" + "id=" + id + "kode=" + kode + ", nama=" + nama + ", sks=" + sks + '}';
+    }  
   
 }

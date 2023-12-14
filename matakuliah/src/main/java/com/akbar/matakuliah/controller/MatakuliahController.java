@@ -3,7 +3,6 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.akbar.matakuliah.controller;
-
 import com.akbar.matakuliah.entity.Matakuliah;
 import com.akbar.matakuliah.service.MatakuliahService;
 import java.util.List;
@@ -16,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  *
- * @author azzammil akbar ramadhan
+ * @author Dell
  */
 @RestController
 @RequestMapping("api/v1/matakuliah")
@@ -33,4 +32,3 @@ public class MatakuliahController {
         matakuliahService.insert(matakuliah);
     }
 }
-

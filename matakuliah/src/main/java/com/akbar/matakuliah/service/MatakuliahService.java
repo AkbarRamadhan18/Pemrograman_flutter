@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 /**
  *
- * @author azzammil akbar ramadhan
+ * @author Dell
  */
 @Service
 public class MatakuliahService {
@@ -29,11 +29,10 @@ public class MatakuliahService {
     
     public void insert(Matakuliah matakuliah){
         Optional<Matakuliah> matakuliahOptional = 
-                matakuliahRepository.findMatakuliahByKode(matakuliah.getKode());
+                matakuliahRepository.findMatakuliahById(matakuliah.getId());
         if(matakuliahOptional.isPresent()){
             throw new IllegalStateException("Email Sudah Ada");
         }
         matakuliahRepository.save(matakuliah);
     }
 }
-

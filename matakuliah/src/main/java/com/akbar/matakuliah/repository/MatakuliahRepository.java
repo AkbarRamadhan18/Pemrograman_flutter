@@ -11,9 +11,9 @@ import org.springframework.stereotype.Repository;
 
 /**
  *
- * @author azzammil akbar ramadhan
+ * @author HP 840 G3
  */
 @Repository
 public interface MatakuliahRepository extends JpaRepository<Matakuliah, Long> {
-    public Optional<Matakuliah> findMatakuliahByKode(Long kode);
+    public Optional<Matakuliah> findMatakuliahById(Long id);
 }
