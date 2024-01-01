@@ -35,6 +35,11 @@ public class MahasiswaController {
     return mahasiswaService.getAll();
     }
     
+     @GetMapping(path = "[id]")
+    public Mahasiswa getMahasiswaByid(@PathVariable("id") Long id){
+        return mahasiswaService.getMahasiswaById(id);
+    }
+    
     @PostMapping
     public void insert(@RequestBody Mahasiswa mahasiswa){
         mahasiswaService.insert(mahasiswa);

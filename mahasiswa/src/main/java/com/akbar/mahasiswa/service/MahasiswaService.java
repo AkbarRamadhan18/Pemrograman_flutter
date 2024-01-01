@@ -32,6 +32,14 @@ public class MahasiswaService {
          return mahasiswaRepository.findAll();
      }
      
+     public Mahasiswa getMahasiswaById(long id){
+         return mahasiswaRepository.findById(id).get();
+     }
+     
+     public Mahasiswa getMahasiswa(long idmahasiswa){
+         return mahasiswaRepository.findById(idmahasiswa).get();
+     }
+     
       public void insert(Mahasiswa mahasiswa){
         Optional<Mahasiswa> mahasiswaOptional = 
                 mahasiswaRepository.findMahasiswaByEmail(mahasiswa.getEmail());
