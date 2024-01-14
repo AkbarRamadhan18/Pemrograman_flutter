@@ -12,7 +12,7 @@ import jakarta.persistence.Table;
 
 /**
  *
- * @author HP 840 G3
+ * @author Dell
  */
 @Entity
 @Table

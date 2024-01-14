@@ -17,5 +17,6 @@ import org.springframework.stereotype.Repository;
 public interface MahasiswaRepository extends JpaRepository<Mahasiswa, Long>{
 
     public Optional<Mahasiswa> findMahasiswaByEmail(String email);
+    public Optional<Mahasiswa> findMahasiswaById(String id);
     
 }

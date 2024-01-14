@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_crud/Mahasiswa.dart';
+import 'package:flutter_application_crud/MataKuliah.dart';
+import 'package:flutter_application_crud/Nilai.dart';
 import 'package:flutter_application_crud/api.dart';
 
 void main() {
@@ -15,26 +17,81 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-// MyHomePage widget
-// MyHomePage widget
-class _MyHomePageState extends State<MyHomePage> {
-  final ApiService _apiService = ApiService();
-  final TextEditingController _namaController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _tgllahirController = TextEditingController();
-
-  Mahasiswa? _selectedMahasiswa; // Track the selected Mahasiswa for editing
+class MyHomePage extends StatelessWidget {
+  final ApiMahasiswa apiMahasiswa = ApiMahasiswa();
+  final ApiMatakuliah apiMatakuliah = ApiMatakuliah();
+  final ApiNilai apiNilai = ApiNilai();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('CRUD Example'),
+        title: Text('Teknologi Informasi'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MahasiswaScreen(apiMahasiswa),
+                  ),
+                );
+              },
+              child: Text('Mahasiswa'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MatakuliahScreen(apiMatakuliah),
+                  ),
+                );
+              },
+              child: Text('Matakuliah'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => NilaiScreen(apiNilai)),
+                );
+              },
+              child: Text('Nilai'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class MahasiswaScreen extends StatefulWidget {
+  final ApiMahasiswa apiMahasiswa;
+
+  MahasiswaScreen(this.apiMahasiswa);
+
+  @override
+  _MahasiswaScreenState createState() => _MahasiswaScreenState();
+}
+
+class _MahasiswaScreenState extends State<MahasiswaScreen> {
+  final TextEditingController _namaController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _tgllahirController = TextEditingController();
+
+  Mahasiswa? _selectedMahasiswa;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Mahasiswa'),
       ),
       body: Column(
         children: [
@@ -60,36 +117,33 @@ class _MyHomePageState extends State<MyHomePage> {
                   ElevatedButton(
                     onPressed: () async {
                       if (_selectedMahasiswa == null) {
-                        // Creating a new Mahasiswa
-                        Mahasiswa newPost = Mahasiswa(
+                        Mahasiswa newMahasiswa = Mahasiswa(
                           id: 0,
                           nama: _namaController.text,
                           email: _emailController.text,
                           tgllahir: _tgllahirController.text,
                         );
-                        await _apiService.createMahasiswa(newPost);
+                        await widget.apiMahasiswa.createMahasiswa(newMahasiswa);
                       } else {
-                        // Editing an existing Mahasiswa
                         Mahasiswa updatedMahasiswa = Mahasiswa(
                           id: _selectedMahasiswa!.id,
                           nama: _namaController.text,
                           email: _emailController.text,
                           tgllahir: _tgllahirController.text,
                         );
-                        await _apiService.updateMahasiswa(updatedMahasiswa);
-                        _selectedMahasiswa = null; // Reset selected Mahasiswa
+                        await widget.apiMahasiswa
+                            .updateMahasiswa(updatedMahasiswa);
+                        _selectedMahasiswa = null;
                       }
 
-                      // Clear text fields
                       _namaController.clear();
                       _emailController.clear();
                       _tgllahirController.clear();
 
-                      // Refresh the UI
                       setState(() {});
                     },
                     child: Text(_selectedMahasiswa == null
-                        ? 'Create Post'
+                        ? 'Create Mahasiswa'
                         : 'Update Mahasiswa'),
                   ),
                 ],
@@ -98,20 +152,20 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           Expanded(
             child: FutureBuilder<List<Mahasiswa>>(
-              future: _apiService.getMahasiswa(),
+              future: widget.apiMahasiswa.getMahasiswa(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return CircularProgressIndicator();
                 } else if (snapshot.hasError) {
                   return Text('Error: ${snapshot.error}');
                 } else {
-                  List<Mahasiswa> posts = snapshot.data!;
+                  List<Mahasiswa> mahasiswaList = snapshot.data!;
                   return ListView.builder(
-                    itemCount: posts.length,
+                    itemCount: mahasiswaList.length,
                     itemBuilder: (context, index) {
                       return ListTile(
-                        title: Text(posts[index].nama),
-                        subtitle: Text(posts[index].email),
+                        title: Text(mahasiswaList[index].nama),
+                        subtitle: Text(mahasiswaList[index].email),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -121,35 +175,62 @@ class _MyHomePageState extends State<MyHomePage> {
                                     MaterialStatePropertyAll(Colors.red),
                               ),
                               onPressed: () async {
-                                await _apiService
-                                    .deleteMahasiswa(posts[index].id);
-                                setState(() {
-                                  posts.removeAt(index);
-                                });
+                                bool confirmDelete = await showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: Text('Confirm Deletion'),
+                                    content: Text(
+                                        'Are you sure to delete this item?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(context, false),
+                                        child: Text('Cancel'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () async {
+                                          Navigator.pop(context, true);
+
+                                          try {
+                                            await widget.apiMahasiswa
+                                                .deleteMahasiswa(
+                                                    mahasiswaList[index].id);
+
+                                            setState(() {
+                                              mahasiswaList.removeAt(index);
+                                            });
+                                          } catch (e) {
+                                            print(
+                                                'Error deleting Mahasiswa: $e');
+                                            print('StackTrace: ${e}');
+                                          }
+                                        },
+                                        child: Text('Delete'),
+                                      ),
+                                    ],
+                                  ),
+                                );
                               },
                               child: Text("Delete"),
                             ),
                             SizedBox(width: 8),
                             ElevatedButton(
-                              onPressed: () async {
-                                _selectedMahasiswa = posts[index];
-                                // Set values to the controllers for editing
+                              onPressed: () {
+                                _selectedMahasiswa = mahasiswaList[index];
                                 _namaController.text = _selectedMahasiswa!.nama;
                                 _emailController.text =
                                     _selectedMahasiswa!.email;
                                 _tgllahirController.text =
                                     _selectedMahasiswa!.tgllahir;
 
-                                // Refresh the UI
                                 setState(() {});
                               },
                               child: Text("Edit"),
                             ),
                           ],
+
+                          
                         ),
-                        onTap: () async {
-                          // Existing code for navigating to the MahasiswaEditScreen
-                        },
                       );
                     },
                   );
@@ -163,69 +244,239 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-// MahasiswaEditScreen widget
-// MahasiswaEditScreen widget
-class MahasiswaEditScreen extends StatelessWidget {
-  final Mahasiswa mahasiswa;
+class MatakuliahScreen extends StatefulWidget {
+  final ApiMatakuliah apiMatakuliah;
 
-  MahasiswaEditScreen({required this.mahasiswa});
+  MatakuliahScreen(this.apiMatakuliah);
 
-  final ApiService _apiService = ApiService();
-  final TextEditingController _editedNamaController = TextEditingController();
-  final TextEditingController _editedEmailController = TextEditingController();
-  final TextEditingController _editedTglLahirController =
-      TextEditingController();
+  @override
+  _MatakuliahScreenState createState() => _MatakuliahScreenState();
+}
+
+class _MatakuliahScreenState extends State<MatakuliahScreen> {
+  final TextEditingController _kodeController = TextEditingController();
+  final TextEditingController _namaController = TextEditingController();
+  final TextEditingController _sksController = TextEditingController();
+
+  Matakuliah? _selectedMatakuliah;
 
   @override
   Widget build(BuildContext context) {
-    _editedNamaController.text = mahasiswa.nama;
-    _editedEmailController.text = mahasiswa.email;
-    _editedTglLahirController.text = mahasiswa.tgllahir;
-
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Mahasiswa'),
+        title: Text('Matakuliah'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Form(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextFormField(
-                controller: _editedNamaController,
-                decoration: InputDecoration(labelText: 'Nama'),
-              ),
-              TextFormField(
-                controller: _editedEmailController,
-                decoration: InputDecoration(labelText: 'Email'),
-              ),
-              TextFormField(
-                controller: _editedTglLahirController,
-                decoration: InputDecoration(labelText: 'Tgl Lahir'),
-              ),
-              SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () async {
-                  // Example: Updating an existing Mahasiswa
-                  Mahasiswa updatedMahasiswa = Mahasiswa(
-                    id: mahasiswa.id,
-                    nama: _editedNamaController.text,
-                    email: _editedEmailController.text,
-                    tgllahir: _editedTglLahirController.text,
-                  );
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Form(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TextFormField(
+                    controller: _kodeController,
+                    decoration: InputDecoration(labelText: 'Kode'),
+                  ),
+                  TextFormField(
+                    controller: _namaController,
+                    decoration: InputDecoration(labelText: 'Nama'),
+                  ),
+                  TextFormField(
+                    controller: _sksController,
+                    decoration: InputDecoration(labelText: 'SKS'),
+                  ),
+                  SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () async {
+                      if (_selectedMatakuliah == null) {
+                        Matakuliah newMatakuliah = Matakuliah(
+                          id: 0,
+                          kode: _kodeController.text,
+                          nama: _namaController.text,
+                          sks: int.parse(_sksController.text),
+                        );
+                        await widget.apiMatakuliah
+                            .createMatakuliah(newMatakuliah);
+                      } else {
+                        Matakuliah updatedMatakuliah = Matakuliah(
+                          id: _selectedMatakuliah!.id,
+                          kode: _kodeController.text,
+                          nama: _namaController.text,
+                          sks: int.parse(_sksController.text),
+                        );
+                        await widget.apiMatakuliah
+                            .updateMatakuliah(updatedMatakuliah);
+                        _selectedMatakuliah = null;
+                      }
 
-                  // Save the updated Mahasiswa
-                  await _apiService.updateMahasiswa(updatedMahasiswa);
+                      _kodeController.clear();
+                      _namaController.clear();
+                      _sksController.clear();
 
-                  // Return the updated Mahasiswa to the calling screen
-                  Navigator.pop(context, updatedMahasiswa);
-                },
-                child: Text('Update Mahasiswa'),
+                      setState(() {});
+                    },
+                    child: Text(_selectedMatakuliah == null
+                        ? 'Create Matakuliah'
+                        : 'Update Matakuliah'),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
+          Expanded(
+            child: FutureBuilder<List<Matakuliah>>(
+              future: widget.apiMatakuliah.getMatakuliah(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else {
+                  List<Matakuliah> matakuliahList = snapshot.data!;
+                  return ListView.builder(
+                    itemCount: matakuliahList.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(matakuliahList[index].nama),
+                        subtitle: Text(
+                            'Kode: ${matakuliahList[index].kode}, SKS: ${matakuliahList[index].sks}'),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ElevatedButton(
+                              style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStatePropertyAll(Colors.red),
+                              ),
+                              onPressed: () async {
+                                bool confirmDelete = await showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: Text('Confirm Deletion'),
+                                    content: Text(
+                                        'Are you sure to delete this item?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(context, false),
+                                        child: Text('Cancel'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(context, true),
+                                        child: Text('Delete'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+
+                                if (confirmDelete == true) {
+                                  try {
+                                    await widget.apiMatakuliah.deleteMatakuliah(
+                                        matakuliahList[index].id);
+
+                                    setState(() {
+                                      matakuliahList.removeAt(index);
+                                    });
+                                  } catch (e) {
+                                    print('Error deleting Matakuliah: $e');
+
+                                    print('StackTrace: ${e}');
+                                  }
+                                }
+                              },
+                              child: Text("Delete"),
+                            ),
+                            SizedBox(width: 8),
+                            ElevatedButton(
+                              onPressed: () {
+                                _selectedMatakuliah = matakuliahList[index];
+                                _kodeController.text =
+                                    _selectedMatakuliah!.kode;
+                                _namaController.text =
+                                    _selectedMatakuliah!.nama;
+                                _sksController.text =
+                                    _selectedMatakuliah!.sks.toString();
+
+                                setState(() {});
+                              },
+                              child: Text("Edit"),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                }
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class NilaiScreen extends StatefulWidget {
+  final ApiNilai apiNilai;
+
+  NilaiScreen(this.apiNilai);
+
+  @override
+  _NilaiScreenState createState() => _NilaiScreenState();
+}
+
+class _NilaiScreenState extends State<NilaiScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Nilai'),
+      ),
+      body: FutureBuilder<List<Nilai>>(
+        future: ApiNilai.getNilaiList(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CircularProgressIndicator();
+          } else if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
+          } else {
+            List<Nilai> nilaiList = snapshot.data!;
+            return ListView.builder(
+              itemCount: nilaiList.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text('ID: ${nilaiList[index].id}'),
+                  subtitle: Text('Nilai: ${nilaiList[index].nilai}'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ElevatedButton(
+                        style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStateProperty.all(Colors.red),
+                        ),
+                        onPressed: () async {
+                          await ApiNilai.deleteNilai(nilaiList[index].id);
+                          setState(() {
+                            nilaiList.removeAt(index);
+                          });
+                        },
+                        child: Text("Delete"),
+                      ),
+                      SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: () {},
+                        child: Text("Edit"),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          }
+        },
       ),
     );
   }

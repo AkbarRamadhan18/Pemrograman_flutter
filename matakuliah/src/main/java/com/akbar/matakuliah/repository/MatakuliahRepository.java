@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 
 /**
  *
- * @author HP 840 G3
+ * @author Dell
  */
 @Repository
 public interface MatakuliahRepository extends JpaRepository<Matakuliah, Long> {
